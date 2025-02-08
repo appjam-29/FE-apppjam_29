@@ -23,36 +23,50 @@ import { useEffect, useState } from "react";
 import * as s from "./style.css";
 import Link from "next/link";
 import { ZoomControl } from "react-kakao-maps-sdk";
+import Dropdown from "@/components/Dropdown";
 
-type todayLabel = 'sun'|'mon'|'tue'|'wed'|'thu'|'fri'|'sat'
+type todayLabel = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
 function getTodayLabel() {
-  const week:todayLabel[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+  const week: todayLabel[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
   const today = new Date().getDay();
   const todayLabel = week[today];
   return todayLabel;
 }
+
+const type: ("rating_score" | "mode")[] = ["rating_score", "mode"];
+
 export default function Home() {
   const router = useRouter();
   const { mode, setMode } = useMagic((state) => state);
   const [recommendState, setRecommendState] = useState<string | null>(null);
   const [pos, setPos] = useState({ lat: 37.545085, lng: 127.057695 });
   const [places, setPlaces] = useState<
-    { distance: number,id: string,latitude: number,longitude: number,name: string,
-      opening_hours:{
-        fri: string,
-        mon: string,
-        sat: string,
-        sun: string,
-        thu: string,
-        tue: string,
-        wed: string,
-      },
-      preview_image:{
-        photos:string[],
-        thumbnail:string
-      }
-     }[]
+    {
+      distance: number;
+      id: string;
+      latitude: number;
+      longitude: number;
+      name: string;
+      opening_hours: {
+        fri: string;
+        mon: string;
+        sat: string;
+        sun: string;
+        thu: string;
+        tue: string;
+        wed: string;
+      };
+      preview_image: {
+        photos: string[];
+        thumbnail: string;
+      };
+    }[]
   >([]);
+
+  const [filter, setFilter] = useState<{ rating_score: string; mode: string }>({
+    rating_score: "",
+    mode: "",
+  });
 
   const onChangeRecommend = (type: string) => {
     setRecommendState(type);
@@ -64,7 +78,6 @@ export default function Home() {
     { id: "change-ambiance", icon: GlyphIcon.SYNC, text: "분위기 전환" },
   ];
   const dayOfWeek = getTodayLabel() || "sat";
-  
 
   async function getNearbyPlaces(map: any) {
     try {
@@ -72,9 +85,7 @@ export default function Home() {
         `/places/nearby?latitude=${pos.lat}&longitude=${pos.lng}&radius=3&max_results=1000`
       );
 
-      setPlaces(
-        response.data.data.places.map((place: any) => ({...place}))
-      );
+      setPlaces(response.data.data.places.map((place: any) => ({ ...place })));
     } catch (error) {
       console.error("Error fetching places:", error);
     }
@@ -86,19 +97,34 @@ export default function Home() {
     }
 
     getNearbyPlaces(null);
-
   }, []);
+
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilter((prev) => ({
+      ...prev,
+      [event.target.name]: [event.target.value],
+    }));
+  };
 
   return (
     <VStack fullWidth fullHeight>
-      {
-        recommendState !== null &&
-        <HStack  fullWidth className={s.filterContainer}>
-          <select>
-
-          </select>
+      {recommendState !== null && (
+        <HStack
+          fullWidth
+          className={s.filterContainer}
+          spacing={4}
+          justify={StackJustify.START}
+        >
+          {type.map((item) => (
+            <Dropdown
+              selectedValue={filter[item]}
+              handleChange={handleChange}
+              type={item}
+              key={item}
+            />
+          ))}
         </HStack>
-      }
+      )}
       <KakaoMap
         center={{ lat: pos.lat, lng: pos.lng }}
         onDragEnd={(map) => {
@@ -168,10 +194,7 @@ export default function Home() {
                       <Typo.Moderate weight={Weight.BOLD}>
                         {item.name}
                       </Typo.Moderate>
-                      <Badge.Default
-                        size={BadgeSize.SMALL}
-                        label={"무소음"}
-                      />
+                      <Badge.Default size={BadgeSize.SMALL} label={"무소음"} />
                     </HStack>
                     <HStack fullWidth spacing={8} className={s.flexStart}>
                       <Typo.Tiny>

@@ -46,5 +46,6 @@ export const img = style({
 });
 
 export const filterContainer = style({
-  background:"#fff"
-})
+  background: "#fff",
+  padding: "4px 8px",
+});
