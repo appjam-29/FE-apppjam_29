@@ -5,10 +5,8 @@ import KakaoMap from "@/components/KakaoMap";
 import PlaceCategory from "@/components/PlaceCategory";
 import MarkerOverlay from "@/components/MarkerOverlay";
 import { api } from "@/api/base";
-import { useMagic, Mode } from "@/stores/useMagic"; // Mode를 useMagic에서 가져옴
+import { useMagic, Mode } from "@/stores/useMagic";
 import {
-  Badge,
-  BadgeSize,
   GlyphIcon,
   HStack,
   Icon,

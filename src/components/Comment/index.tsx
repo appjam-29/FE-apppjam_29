@@ -14,6 +14,7 @@ interface Props {
   date: string;
   score: number;
   comment: string;
+  elipsis?: boolean;
 }
 
 export default function Comment({
@@ -22,6 +23,7 @@ export default function Comment({
   date,
   score,
   comment,
+  elipsis = true,
 }: Props) {
   return (
     <VStack fullWidth align={StackAlign.START} spacing={4}>
@@ -31,14 +33,18 @@ export default function Comment({
         <Typo.Micro>{date}</Typo.Micro>
       </HStack>
       <HStack>
-        {Array.from({ length: score }).map(() => (
-          <Icon name={GlyphIcon.STAR} className={s.filledStar} />
+        {Array.from({ length: score }).map((_, i) => (
+          <Icon
+            key={`filled-${i}`}
+            name={GlyphIcon.STAR}
+            className={s.filledStar}
+          />
         ))}
-        {Array.from({ length: 5 - score }).map(() => (
-          <Icon name={GlyphIcon.STAR} />
+        {Array.from({ length: 5 - score }).map((_, i) => (
+          <Icon key={`empty-${i}`} name={GlyphIcon.STAR} />
         ))}
       </HStack>
-      <Typo.Base className={s.comment}>{comment}</Typo.Base>
+      <Typo.Base className={elipsis ? s.comment : ""}>{comment}</Typo.Base>
     </VStack>
   );
 }

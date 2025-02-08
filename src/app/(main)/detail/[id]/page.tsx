@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Badge,
   Button,
@@ -13,8 +15,13 @@ import {
 import * as s from "./style.css";
 import Comment from "@/components/Comment";
 import KakaoMap from "@/components/KakaoMap";
+import { useParams, useRouter } from "next/navigation";
 
 export default function DetailPage() {
+  const router = useRouter();
+  const params = useParams();
+  const id = params.id;
+
   const data = {
     address_name: "서울 성동구 성수동2가 277-17",
     id: "13062009",
@@ -87,11 +94,16 @@ export default function DetailPage() {
             </Typo.Base>
           </HStack>
           <VStack fullWidth spacing={16}>
-            {data.review.map((item) => (
-              <Comment {...item} />
+            {data.review.map((item, index) => (
+              <Comment {...item} key={index} />
             ))}
           </VStack>
-          <Button.Default className={s.selfCenter}>
+          <Button.Default
+            className={s.selfCenter}
+            onClick={() => {
+              router.push(`/detail/${id}/all`);
+            }}
+          >
             사용자 리뷰 더보기
           </Button.Default>
         </VStack>
