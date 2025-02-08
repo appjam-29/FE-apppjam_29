@@ -8,10 +8,13 @@ import { Mode, useMagic } from '@/stores/useMagic';
 import {
   Badge,
   BadgeSize,
+  Button,
   GlyphIcon,
   HStack,
   Icon,
   IconName,
+  spacingVars,
+  StackAlign,
   StackJustify,
   Typo,
   VStack,
@@ -185,19 +188,29 @@ export default function Home() {
               />
             </HStack>
             <div className={s.content}>
-              <div className={s.purposes}>
-                {purposes.map((purpose) => (
-                  <div
-                    key={purpose.id}
-                    className={`${s.purpose} ${
-                      mode === purpose.id ? s.purposeSelected : ''
-                    }`}
-                    onClick={() => setMode(purpose.id)}>
-                    <Icon name={purpose.icon} />
-                    <Typo.Petite>{purpose.text}</Typo.Petite>
-                  </div>
-                ))}
-              </div>
+              <VStack fullWidth spacing={spacingVars.moderate}>
+                <div className={s.purposes}>
+                  {purposes.map((purpose) => (
+                    <div
+                      key={purpose.id}
+                      className={`${s.purpose} ${
+                        mode === purpose.id ? s.purposeSelected : ''
+                      }`}
+                      onClick={() => setMode(purpose.id)}>
+                      <Icon name={purpose.icon} />
+                      <Typo.Petite>{purpose.text}</Typo.Petite>
+                    </div>
+                  ))}
+                </div>
+                <Button.Default
+                  fullWidth
+                  leadingIcon={GlyphIcon.ADD}
+                  onClick={() => {
+                    router.push('/add-place');
+                  }}>
+                  공간 추가하기
+                </Button.Default>
+              </VStack>
               <Typo.Petite className={s.latestOrPlace}>
                 최근 뜨는 장소
               </Typo.Petite>
@@ -205,6 +218,12 @@ export default function Home() {
           </>
         ) : (
           <>
+            <Icon
+              name={GlyphIcon.CLOSE}
+              onClick={() => {
+                setRecommendState(null);
+              }}
+            />
             {places.map((item) => (
               <Link href={`/detail/${item.id}`} key={item.id}>
                 <HStack
@@ -212,8 +231,8 @@ export default function Home() {
                   justify={StackJustify.BETWEEN}
                   className={s.item}
                   onClick={() => setSelectedPlace(item)}>
-                  <VStack>
-                    <HStack fullWidth spacing={8}>
+                  <VStack align={StackAlign.START} justify={StackJustify.START}>
+                    <HStack spacing={8}>
                       <Typo.Moderate weight={Weight.BOLD}>
                         {item.name}
                       </Typo.Moderate>
@@ -223,7 +242,7 @@ export default function Home() {
                       />
                     </HStack>
                     <HStack fullWidth spacing={8} className={s.flexStart}>
-                      <Typo.Tiny>{item.opening_hours?.[dayOfWeek]}</Typo.Tiny>
+                      <Typo.Tiny>{item.summary}</Typo.Tiny>
                       <HStack>
                         <Icon name={GlyphIcon.STAR} />
                         <Typo.Tiny>{item.rating_score}</Typo.Tiny>
