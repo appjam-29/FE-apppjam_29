@@ -64,7 +64,6 @@ interface PlaceType {
   address: string;
 }
 
-const filterType: ("rating_score" | "mode")[] = ["rating_score", "mode"];
 interface PlacePrefType {
   id: string;
   latitude: number;
@@ -81,6 +80,7 @@ interface PlacePrefType {
   rating_score: number;
   address: string;
 }
+const filterType: ("rating_score" | "mode")[] = ["rating_score", "mode"];
 
 export default function Home() {
   const router = useRouter();
@@ -311,10 +311,7 @@ export default function Home() {
                         </HStack>
                       </VStack>
                       <img
-                        src={
-                          item.preview_image?.photos?.[0] ||
-                          item.preview_image?.thumbnail
-                        }
+                        src={item.preview_image[0]}
                         alt=""
                         className={s.img}
                       />

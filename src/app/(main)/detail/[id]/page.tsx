@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { api } from '@/api/base';
-import Comment, { CommentProps } from '@/components/Comment';
-import KakaoMap from '@/components/KakaoMap';
+import { api } from "@/api/base";
+import Comment, { CommentProps } from "@/components/Comment";
+import KakaoMap from "@/components/KakaoMap";
 import {
   Badge,
   Button,
@@ -14,11 +14,11 @@ import {
   Typo,
   VStack,
   Weight,
-} from '@tapie-kr/inspire-react';
-import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { soundLeveltoString, TSoundLevel } from '../../page';
-import * as s from './style.css';
+} from "@tapie-kr/inspire-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { soundLeveltoString, TSoundLevel } from "../../page";
+import * as s from "./style.css";
 
 interface PlaceType {
   id: string;
@@ -29,13 +29,13 @@ interface PlaceType {
   address: string;
   rating_score: number;
   opening_hours: {
-    mon?: string;
-    tue?: string;
-    wed?: string;
-    thu?: string;
-    fri?: string;
-    sat?: string;
-    sun?: string;
+    monday?: string;
+    tuesday?: string;
+    wednesday?: string;
+    thursday?: string;
+    friday?: string;
+    saturday?: string;
+    sunday?: string;
   };
   preview_image: {
     photos: string[];
@@ -53,9 +53,24 @@ interface ReviewType {
   comment: string;
 }
 
-type todayLabel = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
+type todayLabel =
+  | "sunday"
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday";
 function getTodayLabel(): todayLabel {
-  const week: todayLabel[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const week: todayLabel[] = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
   return week[new Date().getDay()];
 }
 
@@ -83,11 +98,11 @@ export default function DetailPage() {
         setPlaceData(placeResponse.data.data as PlaceType);
 
         const reviewsResponse = await api(true).get(
-          `/places/${placeId}/reviews`,
+          `/places/${placeId}/reviews`
         );
         setReviews(reviewsResponse.data.data.reviews as CommentProps[]);
       } catch (error) {
-        console.error('Error fetching place details:', error);
+        console.error("Error fetching place details:", error);
       } finally {
         setIsLoading(false);
       }
@@ -110,16 +125,16 @@ export default function DetailPage() {
     <VStack fullWidth>
       <img
         src={
-          placeData.preview_image.photos[0] || 'https://placehold.co/1000x1000'
+          placeData.preview_image.photos[0] || "https://placehold.co/1000x1000"
         }
-        alt=''
+        alt=""
         className={s.banner}
       />
       <VStack fullWidth className={s.padding} spacing={16}>
         <HStack fullWidth justify={StackJustify.START} spacing={8}>
           <Typo.Moderate weight={Weight.BOLD}>{placeData.name}</Typo.Moderate>
           <Badge.Default
-            label={soundLeveltoString[placeData.sound_level] ?? ''}
+            label={soundLeveltoString[placeData.sound_level] ?? ""}
           />
         </HStack>
         <hr className={s.line} />
@@ -150,7 +165,8 @@ export default function DetailPage() {
             className={s.selfCenter}
             onClick={() => {
               router.push(`/detail/${placeId}/all`);
-            }}>
+            }}
+          >
             사용자 리뷰 더보기
           </Button.Default>
         </VStack>
@@ -160,7 +176,7 @@ export default function DetailPage() {
             <Typo.Medium weight={Weight.BOLD}>지도</Typo.Medium>
             <KakaoMap
               center={{ lat: placeData.latitude, lng: placeData.longitude }}
-              height='320px'
+              height="320px"
             />
           </VStack>
         </VStack>

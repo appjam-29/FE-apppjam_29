@@ -44,9 +44,24 @@ interface PlaceType {
   address: string;
 }
 
-type todayLabel = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
+type todayLabel =
+  | "sunday"
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday";
 function getTodayLabel(): todayLabel {
-  const week: todayLabel[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+  const week: todayLabel[] = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
   return week[new Date().getDay()];
 }
 
