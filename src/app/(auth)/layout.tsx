@@ -1,6 +1,7 @@
+import MagicButton from '@/components/auth/MagicButton';
 import * as s from './layout.css';
 
-import { Button, HStack, VStack } from '@tapie-kr/inspire-react';
+import { VStack } from '@tapie-kr/inspire-react';
 
 export default function AuthLayout({
   children,
@@ -10,9 +11,7 @@ export default function AuthLayout({
   return (
     <VStack fullWidth fullHeight className={s.base}>
       {children}
-      <HStack fullWidth className={s.button}>
-        <Button.Default fullWidth>Google로 로그인</Button.Default>
-      </HStack>
+      <MagicButton />
     </VStack>
   );
 }
