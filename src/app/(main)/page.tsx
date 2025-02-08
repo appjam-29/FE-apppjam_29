@@ -105,7 +105,6 @@ export default function Home() {
 
   return (
     <VStack fullWidth fullHeight>
-      {filter.mode}sdf
       {recommendState !== null && (
         <HStack fullWidth className={s.filterContainer}>
           {filterType.map((item) => (
