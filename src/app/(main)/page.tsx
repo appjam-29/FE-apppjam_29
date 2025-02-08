@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { api } from '@/api/base';
-import BottomSheet from '@/components/BottomSheet';
-import KakaoMap from '@/components/KakaoMap';
-import MarkerOverlay from '@/components/MarkerOverlay';
-import { Mode, useMagic } from '@/stores/useMagic';
+import { api } from "@/api/base";
+import BottomSheet from "@/components/BottomSheet";
+import KakaoMap from "@/components/KakaoMap";
+import MarkerOverlay from "@/components/MarkerOverlay";
+import { Mode, useMagic } from "@/stores/useMagic";
 import {
   Badge,
   BadgeSize,
@@ -16,23 +16,23 @@ import {
   Typo,
   VStack,
   Weight,
-} from '@tapie-kr/inspire-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { ZoomControl } from 'react-kakao-maps-sdk';
-import * as s from './style.css';
+} from "@tapie-kr/inspire-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { ZoomControl } from "react-kakao-maps-sdk";
+import * as s from "./style.css";
 
-type todayLabel = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
+type todayLabel = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
 function getTodayLabel() {
-  const week: todayLabel[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const week: todayLabel[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
   const today = new Date().getDay();
   const todayLabel = week[today];
   return todayLabel;
 }
 
-import Dropdown from '@/components/Dropdown';
-import PlaceCategory from '@/components/PlaceCategory';
+import Dropdown from "@/components/Dropdown";
+import PlaceCategory from "@/components/PlaceCategory";
 
 interface PlaceType {
   id: string;
@@ -53,7 +53,7 @@ interface PlaceType {
   rating_score: number;
   address: string;
 }
-const filterType: ('rating_score' | 'mode')[] = ['rating_score', 'mode'];
+const filterType: ("rating_score" | "mode")[] = ["rating_score", "mode"];
 
 export default function Home() {
   const router = useRouter();
@@ -66,35 +66,35 @@ export default function Home() {
     rating_score: string;
     mode: string;
   }>({
-    rating_score: '',
-    mode: '',
+    rating_score: "",
+    mode: "",
   });
   const onChangeRecommend = (type: string) => {
     setRecommendState(type);
   };
 
   const purposes: { id: Mode; icon: IconName; text: string }[] = [
-    { id: 'work', icon: GlyphIcon.DESCRIPTION, text: '작업' },
-    { id: 'rest', icon: GlyphIcon.SCHEDULE, text: '휴식' },
-    { id: 'change-ambiance', icon: GlyphIcon.SYNC, text: '분위기 전환' },
+    { id: "work", icon: GlyphIcon.DESCRIPTION, text: "작업" },
+    { id: "rest", icon: GlyphIcon.SCHEDULE, text: "휴식" },
+    { id: "change-ambiance", icon: GlyphIcon.SYNC, text: "분위기 전환" },
   ];
-  const dayOfWeek = getTodayLabel() || 'sat';
+  const dayOfWeek = getTodayLabel() || "sat";
 
   async function getNearbyPlaces(map: any) {
     try {
       const response = await api(true).get(
-        `/places/nearby?latitude=${pos.lat}&longitude=${pos.lng}&radius=3&max_results=1000`,
+        `/places/nearby?latitude=${pos.lat}&longitude=${pos.lng}&radius=3&max_results=1000`
       );
 
       setPlaces(response.data.data.places.map((place: any) => ({ ...place })));
     } catch (error) {
-      console.error('Error fetching places:', error);
+      console.error("Error fetching places:", error);
     }
   }
 
   useEffect(() => {
-    if (!localStorage.getItem('token')) {
-      router.push('/login');
+    if (!localStorage.getItem("token")) {
+      router.push("/login");
     }
     getNearbyPlaces(null);
   }, []);
@@ -106,7 +106,12 @@ export default function Home() {
   return (
     <VStack fullWidth fullHeight>
       {recommendState !== null && (
-        <HStack fullWidth className={s.filterContainer}>
+        <HStack
+          fullWidth
+          className={s.filterContainer}
+          justify={StackJustify.START}
+          spacing={4}
+        >
           {filterType.map((item) => (
             <Dropdown
               handleChange={handleChange}
@@ -123,7 +128,8 @@ export default function Home() {
           setPos({ lat: latlng.getLat(), lng: latlng.getLng() });
           getNearbyPlaces(map);
         }}
-        onZoomChanged={getNearbyPlaces}>
+        onZoomChanged={getNearbyPlaces}
+      >
         <ZoomControl />
         {places.map((place) => (
           <div key={place.id} onClick={() => setSelectedPlace(place)}>
@@ -157,7 +163,7 @@ export default function Home() {
                 </HStack>
               </HStack>
 
-              <div style={{ display: 'flex' }}>
+              <div style={{ display: "flex" }}>
                 <Typo.Mini>
                   {String(selectedPlace.distance).substring(0, 4)}km
                 </Typo.Mini>
@@ -166,7 +172,7 @@ export default function Home() {
             </VStack>
             <img
               src={selectedPlace.preview_image?.thumbnail}
-              alt=''
+              alt=""
               className={s.img}
             />
           </HStack>
@@ -174,14 +180,14 @@ export default function Home() {
           <>
             <HStack fullWidth>
               <PlaceCategory
-                label={'작업하기 좋은 카페'}
+                label={"작업하기 좋은 카페"}
                 count={15}
-                onClick={() => onChangeRecommend('CAFE')}
+                onClick={() => onChangeRecommend("CAFE")}
               />
               <PlaceCategory
-                label={'자연과 만나는 수목원'}
+                label={"자연과 만나는 수목원"}
                 count={15}
-                onClick={() => onChangeRecommend('arboretum')}
+                onClick={() => onChangeRecommend("arboretum")}
               />
             </HStack>
             <div className={s.content}>
@@ -190,9 +196,10 @@ export default function Home() {
                   <div
                     key={purpose.id}
                     className={`${s.purpose} ${
-                      mode === purpose.id ? s.purposeSelected : ''
+                      mode === purpose.id ? s.purposeSelected : ""
                     }`}
-                    onClick={() => setMode(purpose.id)}>
+                    onClick={() => setMode(purpose.id)}
+                  >
                     <Icon name={purpose.icon} />
                     <Typo.Petite>{purpose.text}</Typo.Petite>
                   </div>
@@ -211,7 +218,8 @@ export default function Home() {
                   fullWidth
                   justify={StackJustify.BETWEEN}
                   className={s.item}
-                  onClick={() => setSelectedPlace(item)}>
+                  onClick={() => setSelectedPlace(item)}
+                >
                   <VStack>
                     <HStack fullWidth spacing={8}>
                       <Typo.Moderate weight={Weight.BOLD}>
@@ -232,7 +240,7 @@ export default function Home() {
                   </VStack>
                   <img
                     src={item.preview_image?.thumbnail}
-                    alt=''
+                    alt=""
                     className={s.img}
                   />
                 </HStack>

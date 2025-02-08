@@ -10,7 +10,7 @@ import {
   VStack,
 } from "@tapie-kr/inspire-react";
 
-interface Props {
+export interface CommentProps {
   author: {
     name: string;
     id: string;

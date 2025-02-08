@@ -13,7 +13,7 @@ import {
   Weight,
 } from "@tapie-kr/inspire-react";
 import * as s from "./style.css";
-import Comment from "@/components/Comment";
+import Comment, { CommentProps } from "@/components/Comment";
 import KakaoMap from "@/components/KakaoMap";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -65,7 +65,7 @@ export default function DetailPage() {
   const placeId = params.id as string;
 
   const [placeData, setPlaceData] = useState<PlaceType | null>(null);
-  const [reviews, setReviews] = useState<ReviewType[]>([]);
+  const [reviews, setReviews] = useState<CommentProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const dayOfWeek = getTodayLabel();
   const [pos] = useState({ lat: 37.545085, lng: 127.057695 });
@@ -85,7 +85,7 @@ export default function DetailPage() {
         const reviewsResponse = await api(true).get(
           `/places/${placeId}/reviews`
         );
-        setReviews(reviewsResponse.data.data as ReviewType[]);
+        setReviews(reviewsResponse.data.data.reviews as CommentProps[]);
       } catch (error) {
         console.error("Error fetching place details:", error);
       } finally {
