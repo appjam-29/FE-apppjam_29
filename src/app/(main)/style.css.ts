@@ -44,3 +44,7 @@ export const img = style({
   height: "60px",
   borderRadius: "8px",
 });
+
+export const filterContainer = style({
+  background:"#fff"
+})
