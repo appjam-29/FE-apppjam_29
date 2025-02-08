@@ -70,6 +70,7 @@ export default function Home() {
   const [recommendState, setRecommendState] = useState<string | null>(null);
   const [selectedPlace, setSelectedPlace] = useState<PlaceType | null>(null);
   const [places, setPlaces] = useState<PlaceType[]>([]);
+  const [latestPlaces, setLatestPlaces] = useState<PlaceType[]>([]);
   const [filter, setFilter] = useState<{
     rating_score: string;
     mode: string;
@@ -99,6 +100,24 @@ export default function Home() {
       console.error("Error fetching places:", error);
     }
   }
+
+  useEffect(() => {
+    async function fetchLatestPlaces() {
+      try {
+        const response = await api(true).get("/places/dst/user-preference");
+
+        const recommendedPlaces = response.data.data.menu?.[0]?.places ?? [];
+
+        console.log("✅ 최신 장소 데이터:", recommendedPlaces);
+        setLatestPlaces(recommendedPlaces);
+      } catch (error) {
+        console.error("🚨 사용자 맞춤 추천 불러오기 실패:", error);
+        setLatestPlaces([]);
+      }
+    }
+
+    fetchLatestPlaces();
+  }, []);
 
   useEffect(() => {
     if (!localStorage.getItem("token")) {
@@ -213,9 +232,47 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <Typo.Petite className={s.latestOrPlace}>
-                최근 뜨는 장소
-              </Typo.Petite>
+              <div className={s.latestBox}>
+                <Typo.Petite className={s.latestPlace}>
+                  최근 뜨는 장소
+                </Typo.Petite>
+                {latestPlaces.map((item) => (
+                  <Link href={`/detail/${item.id}`} key={item.id}>
+                    <HStack
+                      fullWidth
+                      justify={StackJustify.BETWEEN}
+                      className={s.item}
+                      onClick={() => setSelectedPlace(item)}
+                    >
+                      <VStack>
+                        <HStack fullWidth spacing={8}>
+                          <Typo.Moderate weight={Weight.BOLD}>
+                            {item.name}
+                          </Typo.Moderate>
+                          <Badge.Default
+                            size={BadgeSize.SMALL}
+                            label={soundLeveltoString[item.sound_level]}
+                          />
+                        </HStack>
+                        <HStack fullWidth spacing={8} className={s.flexStart}>
+                          <Typo.Tiny>
+                            {item.opening_hours?.[dayOfWeek]}
+                          </Typo.Tiny>
+                          <HStack>
+                            <Icon name={GlyphIcon.STAR} />
+                            <Typo.Tiny>{item.rating_score}</Typo.Tiny>
+                          </HStack>
+                        </HStack>
+                      </VStack>
+                      <img
+                        src={item.preview_image[0]}
+                        alt=""
+                        className={s.img}
+                      />
+                    </HStack>
+                  </Link>
+                ))}
+              </div>
             </div>
           </>
         ) : (
