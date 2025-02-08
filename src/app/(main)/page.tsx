@@ -230,8 +230,8 @@ export default function Home() {
                   justify={StackJustify.BETWEEN}
                   className={s.item}
                   onClick={() => setSelectedPlace(item)}>
-                  <VStack>
-                    <HStack fullWidth spacing={8}>
+                  <VStack fullWidth align={StackAlign.START}>
+                    <HStack spacing={8}>
                       <Typo.Moderate weight={Weight.BOLD}>
                         {item.name}
                       </Typo.Moderate>
@@ -249,7 +249,7 @@ export default function Home() {
                     </HStack>
                   </VStack>
                   <img
-                    src={item.preview_image?.thumbnail}
+                    src={item.preview_image?.photos[0]}
                     alt=''
                     className={s.img}
                   />
