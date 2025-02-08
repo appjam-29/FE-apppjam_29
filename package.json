@@ -14,9 +14,13 @@
     "@vanilla-extract/css": "^1.17.1",
     "@vanilla-extract/webpack-plugin": "^2.3.17",
     "axios": "^1.7.9",
+    "motion": "^12.4.1",
     "next": "15.1.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-kakao-maps-sdk": "^1.1.27",
+    "react-modal-sheet": "^4.0.1",
+    "react-spring-bottom-sheet": "^3.4.1"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",

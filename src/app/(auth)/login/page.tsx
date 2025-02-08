@@ -1,3 +1,5 @@
+'use client';
+
 import * as s from './page.css';
 
 import Logo from '@/components/Logo';
@@ -9,8 +11,18 @@ import {
   VStack,
   Weight,
 } from '@tapie-kr/inspire-react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function AuthPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      router.push('/');
+    }
+  }, []);
+
   return (
     <VStack fullWidth fullHeight className={s.base}>
       <VStack spacing={spacingVars.base} className={s.logoContainer}>
