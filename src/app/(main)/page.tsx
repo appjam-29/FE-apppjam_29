@@ -26,7 +26,7 @@ import { ZoomControl } from "react-kakao-maps-sdk";
 
 type todayLabel = 'sun'|'mon'|'tue'|'wed'|'thu'|'fri'|'sat'
 function getTodayLabel() {
-  const week = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+  const week:todayLabel[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
   const today = new Date().getDay();
   const todayLabel = week[today];
   return todayLabel;
@@ -37,15 +37,15 @@ export default function Home() {
   const [recommendState, setRecommendState] = useState<string | null>(null);
   const [pos, setPos] = useState({ lat: 37.545085, lng: 127.057695 });
   const [places, setPlaces] = useState<
-    { distance: number,id: string,latitude: number,longitude: number,name: string,lat:number, lng:number,
+    { distance: number,id: string,latitude: number,longitude: number,name: string,
       opening_hours:{
-        fri: string
-        mon: string
-        sat: string
-        sun: string
-        thu: string
-        tue: string
-        wed: string
+        fri: string,
+        mon: string,
+        sat: string,
+        sun: string,
+        thu: string,
+        tue: string,
+        wed: string,
       },
       preview_image:{
         photos:string[],
@@ -63,7 +63,7 @@ export default function Home() {
     { id: "rest", icon: GlyphIcon.SCHEDULE, text: "휴식" },
     { id: "change-ambiance", icon: GlyphIcon.SYNC, text: "분위기 전환" },
   ];
-  const dayOfWeek = getTodayLabel();
+  const dayOfWeek = getTodayLabel() || "sat";
   
 
   async function getNearbyPlaces(map: any) {
@@ -73,11 +73,7 @@ export default function Home() {
       );
 
       setPlaces(
-        response.data.data.places.map((place: any) => ({
-          name: place.name,
-          lat: place.latitude,
-          lng: place.longitude,
-        }))
+        response.data.data.places.map((place: any) => ({...place}))
       );
     } catch (error) {
       console.error("Error fetching places:", error);
@@ -90,6 +86,7 @@ export default function Home() {
     }
 
     getNearbyPlaces(null);
+
   }, []);
 
   return (
@@ -117,7 +114,7 @@ export default function Home() {
         {places.map((place, index) => (
           <MarkerOverlay
             key={index}
-            position={{ lat: place.lat, lng: place.lng }}
+            position={{ lat: place.latitude, lng: place.longitude }}
           />
         ))}
       </KakaoMap>
@@ -178,7 +175,7 @@ export default function Home() {
                     </HStack>
                     <HStack fullWidth spacing={8} className={s.flexStart}>
                       <Typo.Tiny>
-                        {item.opening_hours[dayOfWeek as todayLabel]}
+                        {item.opening_hours?.[dayOfWeek as todayLabel]}
                       </Typo.Tiny>
                       <HStack>
                         <Icon name={GlyphIcon.STAR} />
@@ -187,7 +184,7 @@ export default function Home() {
                     </HStack>
                   </VStack>
                   <img
-                    src={item.preview_image.thumbnail}
+                    src={item.preview_image?.thumbnail}
                     alt=""
                     className={s.img}
                   />
