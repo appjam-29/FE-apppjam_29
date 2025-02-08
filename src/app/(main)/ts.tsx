@@ -22,17 +22,7 @@ import { useEffect, useState } from "react";
 import * as s from "./style.css";
 import Link from "next/link";
 import { ZoomControl } from "react-kakao-maps-sdk";
-
-type todayLabel = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
-function getTodayLabel() {
-  const week: todayLabel[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-  const today = new Date().getDay();
-  const todayLabel = week[today];
-  return todayLabel;
-}
-
 import PlaceCategory from "@/components/PlaceCategory";
-import Dropdown from "@/components/Dropdown";
 
 interface PlaceType {
   id: string;
@@ -53,40 +43,28 @@ interface PlaceType {
   rating_score: number;
   address: string;
 }
-const filterType: ("rating_score" | "mode")[] = ["rating_score", "mode"];
+
+type todayLabel = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
+function getTodayLabel(): todayLabel {
+  const week: todayLabel[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+  return week[new Date().getDay()];
+}
 
 export default function Home() {
   const router = useRouter();
   const { mode, setMode } = useMagic((state) => state);
   const [pos, setPos] = useState({ lat: 37.545085, lng: 127.057695 });
   const [recommendState, setRecommendState] = useState<string | null>(null);
-  const [selectedPlace, setSelectedPlace] = useState<PlaceType | null>(null);
   const [places, setPlaces] = useState<PlaceType[]>([]);
-  const [filter, setFilter] = useState<{
-    rating_score: string;
-    mode: string;
-  }>({
-    rating_score: "",
-    mode: "",
-  });
-  const onChangeRecommend = (type: string) => {
-    setRecommendState(type);
-  };
-
-  const purposes: { id: Mode; icon: IconName; text: string }[] = [
-    { id: "work", icon: GlyphIcon.DESCRIPTION, text: "작업" },
-    { id: "rest", icon: GlyphIcon.SCHEDULE, text: "휴식" },
-    { id: "change-ambiance", icon: GlyphIcon.SYNC, text: "분위기 전환" },
-  ];
-  const dayOfWeek = getTodayLabel() || "sat";
+  const [selectedPlace, setSelectedPlace] = useState<PlaceType | null>(null);
+  const dayOfWeek = getTodayLabel();
 
   async function getNearbyPlaces(map: any) {
     try {
       const response = await api(true).get(
         `/places/nearby?latitude=${pos.lat}&longitude=${pos.lng}&radius=3&max_results=1000`
       );
-
-      setPlaces(response.data.data.places.map((place: any) => ({ ...place })));
+      setPlaces(response.data.data.places);
     } catch (error) {
       console.error("Error fetching places:", error);
     }
@@ -99,24 +77,18 @@ export default function Home() {
     getNearbyPlaces(null);
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilter((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const onChangeRecommend = (type: string) => {
+    setRecommendState(type);
   };
+
+  const purposes: { id: Mode; icon: IconName; text: string }[] = [
+    { id: "work", icon: GlyphIcon.DESCRIPTION, text: "작업" },
+    { id: "rest", icon: GlyphIcon.SCHEDULE, text: "휴식" },
+    { id: "change-ambiance", icon: GlyphIcon.SYNC, text: "분위기 전환" },
+  ];
 
   return (
     <VStack fullWidth fullHeight>
-      {filter.mode}sdf
-      {recommendState !== null && (
-        <HStack fullWidth className={s.filterContainer}>
-          {filterType.map((item) => (
-            <Dropdown
-              handleChange={handleChange}
-              type={item}
-              selectedValue={filter[item]}
-            />
-          ))}
-        </HStack>
-      )}
       <KakaoMap
         center={{ lat: pos.lat, lng: pos.lng }}
         onDragEnd={(map) => {

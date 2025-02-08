@@ -1,6 +1,6 @@
 // MarkerOverlay.tsx
-import { CustomOverlayMap } from 'react-kakao-maps-sdk';
-import * as styles from './styles.css';
+import { CustomOverlayMap } from "react-kakao-maps-sdk";
+import * as styles from "./styles.css";
 
 interface Place {
   name: string;
