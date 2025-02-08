@@ -41,7 +41,7 @@ export default function Comment({
   rating,
   sound_level,
   elipsis = true,
-}: Props) {
+}: CommentProps) {
   return (
     <VStack fullWidth align={StackAlign.START} spacing={4}>
       <HStack spacing={8}>

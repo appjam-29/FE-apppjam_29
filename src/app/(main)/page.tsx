@@ -52,8 +52,8 @@ interface PlaceType {
     [key in todayLabel]?: string;
   };
   preview_image: {
-    photos: string[];
-    thumbnail: string;
+    photos: string[]; // This accepts an array of photo URLs.
+    thumbnail: string; // This accepts a single thumbnail URL.
   };
   tags: Record<string, string>; // 빈 객체이므로 임의의 키-값을 받을 수 있도록 설정
   summary: string;
@@ -61,6 +61,7 @@ interface PlaceType {
   rating_score: number;
   address: string;
 }
+
 const filterType: ("rating_score" | "mode")[] = ["rating_score", "mode"];
 
 export default function Home() {
@@ -265,7 +266,10 @@ export default function Home() {
                         </HStack>
                       </VStack>
                       <img
-                        src={item.preview_image[0]}
+                        src={
+                          item.preview_image?.photos?.[0] ||
+                          item.preview_image?.thumbnail
+                        }
                         alt=""
                         className={s.img}
                       />
