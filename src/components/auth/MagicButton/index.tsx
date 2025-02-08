@@ -1,5 +1,6 @@
 'use client';
 
+import { useLogin } from '@/hooks/useLogin';
 import * as s from './styles.css';
 
 import { BrandIcon, Button, GlyphIcon, HStack } from '@tapie-kr/inspire-react';
@@ -18,12 +19,16 @@ export default function MagicButton() {
   const currentPath = usePathname();
   const router = useRouter();
 
+  const googleAction = useLogin(() => {
+    router.push('/signup/purpose');
+  });
+
   const pathMap: PathMapType = {
     '/login': {
       leadingIcon: BrandIcon.GOOGLE,
       label: 'Google로 로그인',
       action: () => {
-        router.push('/signup/purpose');
+        googleAction();
       },
     },
     '/signup/purpose': {
