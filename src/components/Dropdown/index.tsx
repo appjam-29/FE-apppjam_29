@@ -33,8 +33,7 @@ const modetoValue = {
 export default function Dropdown({ type, selectedValue, handleChange }: Props) {
   return (
     <select
-      defaultValue=""
-      value={selectedValue}
+      value={selectedValue} // Use only 'value' for controlled component
       onChange={handleChange}
       name={type}
       className={s.contianer}
@@ -46,7 +45,11 @@ export default function Dropdown({ type, selectedValue, handleChange }: Props) {
         (key) => (
           <option
             key={key}
-            value={modetoValue[key as keyof typeof modetoValue]}
+            value={
+              type === "mode"
+                ? modetoValue[key as keyof typeof modetoValue]
+                : ratingScoretoValue[key as keyof typeof ratingScoretoValue]
+            }
           >
             {key}
           </option>
@@ -55,4 +58,3 @@ export default function Dropdown({ type, selectedValue, handleChange }: Props) {
     </select>
   );
 }
-s;
