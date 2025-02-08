@@ -1,4 +1,4 @@
-import "./global.css";
+import { InspireProvider } from '@tapie-kr/inspire-react/provider';
 
 export default function RootLayout({
   children,
@@ -6,8 +6,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
-      <body>{children}</body>
+    <html>
+      <body>
+        <InspireProvider>{children}</InspireProvider>
+      </body>
     </html>
   );
 }
