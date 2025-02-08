@@ -12,17 +12,18 @@ interface BottomSheetProps {
 }
 
 export default function BottomSheet(props: BottomSheetProps) {
-  const {
-    children,
-    height = 300,
-    minHeight = 100,
-    maxHeight = window.innerHeight * 0.8,
-  } = props;
+  const { children, height = 300, minHeight = 100, maxHeight } = props;
 
   const [heightValue, setHeightValue] = useState(height);
   const [isDragging, setIsDragging] = useState(false);
+  const [maxHeightValue, setMaxHeightValue] = useState(maxHeight);
   const dragStartY = useRef<number>(0);
   const startHeight = useRef<number>(height);
+
+  useEffect(() => {
+    // window 객체는 useEffect 내에서 접근
+    setMaxHeightValue(maxHeight || window.innerHeight * 0.8);
+  }, [maxHeight]);
 
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDragging(true);
@@ -37,7 +38,7 @@ export default function BottomSheet(props: BottomSheetProps) {
     const deltaY = dragStartY.current - currentY;
     const newHeight = Math.min(
       Math.max(startHeight.current + deltaY, minHeight),
-      maxHeight,
+      maxHeightValue || window.innerHeight * 0.8,
     );
 
     setHeightValue(newHeight);

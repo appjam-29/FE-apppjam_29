@@ -1,24 +1,45 @@
-"use client";
+'use client';
 
+import { api } from '@/api/base';
+import { Mode, useMagic } from '@/stores/useMagic';
 import {
   GlyphIcon,
   Icon,
+  IconName,
   Label,
   LabelSize,
   Typo,
   Weight,
-} from "@tapie-kr/inspire-react";
-import { useState } from "react";
-import * as s from "./style.css";
+} from '@tapie-kr/inspire-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
+import * as s from './style.css';
 
 export default function SignupPurposePage() {
-  const [selectedPurpose, setSelectedPurpose] = useState<string | null>(null);
+  const { mode, setMode } = useMagic((state) => state);
 
-  const purposes = [
-    { id: "work", icon: GlyphIcon.DESCRIPTION, text: "작업" },
-    { id: "rest", icon: GlyphIcon.SCHEDULE, text: "휴식" },
-    { id: "refresh", icon: GlyphIcon.SYNC, text: "분위기 전환" },
+  const purposes: { id: Mode; icon: IconName; text: string }[] = [
+    { id: 'work', icon: GlyphIcon.DESCRIPTION, text: '작업' },
+    { id: 'rest', icon: GlyphIcon.SCHEDULE, text: '휴식' },
+    { id: 'change-ambiance', icon: GlyphIcon.SYNC, text: '분위기 전환' },
   ];
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const code = searchParams.get('code');
+
+  useEffect(() => {
+    api(false)
+      .post('/auth/login', { code })
+      .then((res) => {
+        localStorage.setItem('token', res.data.data.access_token);
+
+        if (!res.data.data.new_register) {
+          router.push('/');
+        }
+      });
+  }, []);
 
   return (
     <div className={s.container}>
@@ -29,7 +50,7 @@ export default function SignupPurposePage() {
       <div className={s.title}>
         <div className={s.order}>1/2</div>
         <Typo.Moderate weight={Weight.SEMIBOLD} className={s.titleText}>
-          {"공간을 찾는 목적이 \n주로 무엇인가요?"}
+          {'공간을 찾는 목적이 \n주로 무엇인가요?'}
         </Typo.Moderate>
       </div>
       <div className={s.purposeBox}>
@@ -42,10 +63,9 @@ export default function SignupPurposePage() {
             <div
               key={purpose.id}
               className={`${s.purpose} ${
-                selectedPurpose === purpose.id ? s.purposeSelected : ""
+                mode === purpose.id ? s.purposeSelected : ''
               }`}
-              onClick={() => setSelectedPurpose(purpose.id)}
-            >
+              onClick={() => setMode(purpose.id)}>
               <Icon name={purpose.icon} />
               <Typo.Petite>{purpose.text}</Typo.Petite>
             </div>

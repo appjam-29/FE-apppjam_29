@@ -3,6 +3,8 @@
 import { useLogin } from '@/hooks/useLogin';
 import * as s from './styles.css';
 
+import { api } from '@/api/base';
+import { useMagic } from '@/stores/useMagic';
 import { BrandIcon, Button, GlyphIcon, HStack } from '@tapie-kr/inspire-react';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -18,6 +20,8 @@ type PathMapType = {
 export default function MagicButton() {
   const currentPath = usePathname();
   const router = useRouter();
+
+  const { mode, sound } = useMagic((state) => state);
 
   const googleAction = useLogin(() => {
     router.push('/signup/purpose');
@@ -41,7 +45,10 @@ export default function MagicButton() {
       label: '시작하기',
       trailingIcon: GlyphIcon.ARROW_FORWARD,
       action: () => {
-        console.log('Signup complete');
+        api(true).post('/member/update-personalized-data', {
+          mode,
+          sound,
+        });
       },
     },
   };
