@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Box, HStack, VStack } from '@tapie-kr/inspire-react';
-import { useEffect, useRef, useState } from 'react';
-import * as s from './styles.css';
+import { Box, HStack, VStack } from "@tapie-kr/inspire-react";
+import { useEffect, useRef, useState } from "react";
+import * as s from "./styles.css";
 
 interface BottomSheetProps {
   children: React.ReactNode;
@@ -27,18 +27,18 @@ export default function BottomSheet(props: BottomSheetProps) {
 
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDragging(true);
-    dragStartY.current = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    dragStartY.current = "touches" in e ? e.touches[0].clientY : e.clientY;
     startHeight.current = heightValue;
   };
 
   const handleDrag = (e: MouseEvent | TouchEvent) => {
     if (!isDragging) return;
 
-    const currentY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const currentY = "touches" in e ? e.touches[0].clientY : e.clientY;
     const deltaY = dragStartY.current - currentY;
     const newHeight = Math.min(
       Math.max(startHeight.current + deltaY, minHeight),
-      maxHeightValue || window.innerHeight * 0.8,
+      maxHeightValue || window.innerHeight * 0.8
     );
 
     setHeightValue(newHeight);
@@ -49,18 +49,22 @@ export default function BottomSheet(props: BottomSheetProps) {
   };
 
   useEffect(() => {
-    document.addEventListener('mousemove', handleDrag);
-    document.addEventListener('mouseup', handleDragEnd);
-    document.addEventListener('touchmove', handleDrag);
-    document.addEventListener('touchend', handleDragEnd);
+    document.addEventListener("mousemove", handleDrag);
+    document.addEventListener("mouseup", handleDragEnd);
+    document.addEventListener("touchmove", handleDrag);
+    document.addEventListener("touchend", handleDragEnd);
 
     return () => {
-      document.removeEventListener('mousemove', handleDrag);
-      document.removeEventListener('mouseup', handleDragEnd);
-      document.removeEventListener('touchmove', handleDrag);
-      document.removeEventListener('touchend', handleDragEnd);
+      document.removeEventListener("mousemove", handleDrag);
+      document.removeEventListener("mouseup", handleDragEnd);
+      document.removeEventListener("touchmove", handleDrag);
+      document.removeEventListener("touchend", handleDragEnd);
     };
   }, [isDragging]);
+
+  useEffect(() => {
+    setHeightValue(height);
+  }, [height]);
 
   return (
     <VStack
@@ -68,14 +72,16 @@ export default function BottomSheet(props: BottomSheetProps) {
       className={s.base}
       style={{
         height: heightValue,
-        transition: isDragging ? 'none' : 'height 0.2s ease',
-      }}>
+        transition: isDragging ? "none" : "height 0.2s ease",
+      }}
+    >
       <HStack
         fullWidth
         className={s.headerContainer}
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
-        style={{ cursor: 'ns-resize' }}>
+        style={{ cursor: "ns-resize" }}
+      >
         <Box fullWidth className={s.header} />
       </HStack>
       <Box fullWidth fullHeight>

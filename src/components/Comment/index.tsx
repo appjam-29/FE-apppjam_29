@@ -21,12 +21,12 @@ export interface CommentProps {
   id: string;
   images: string[];
   rating: number;
-  sound_level: "silent" | "calm" | "white" | "noisy" | "unknown";
+  sound_level: "quiet" | "calm" | "white" | "noisy" | "unknown";
   elipsis: boolean;
 }
 
 const soundLeveltoString = {
-  silent: "무소음",
+  quiet: "무소음",
   calm: "잔잔한",
   white: "백색소음",
   noisy: "시끄러운",

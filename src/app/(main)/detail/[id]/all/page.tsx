@@ -18,7 +18,7 @@ type Treview = {
   id: string;
   images: string[];
   rating: number;
-  sound_level: "silent" | "calm" | "white" | "noisy" | "unknown";
+  sound_level: "quiet" | "calm" | "white" | "noisy" | "unknown";
 };
 
 export default function AllReviewPage() {

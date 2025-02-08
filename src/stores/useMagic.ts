@@ -1,7 +1,7 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-export type Mode = 'work' | 'rest' | 'change-ambiance';
-export type Sound = 'silent' | 'calm' | 'white' | 'noisy';
+export type Mode = "work" | "rest" | "change-ambiance";
+export type Sound = "quiet" | "calm" | "white" | "noisy";
 
 interface MagicState {
   mode: Mode;
@@ -12,9 +12,9 @@ interface MagicState {
 }
 
 export const useMagic = create<MagicState>((set) => ({
-  mode: 'work',
+  mode: "work",
   setMode: (mode: Mode) => set({ mode: mode }),
 
-  sound: 'silent',
+  sound: "quiet",
   setSound: (sound: Sound) => set({ sound: sound }),
 }));

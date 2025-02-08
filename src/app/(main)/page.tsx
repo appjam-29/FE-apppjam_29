@@ -13,6 +13,7 @@ import {
   Icon,
   IconName,
   StackJustify,
+  StackAlign,
   Typo,
   VStack,
   Weight,
@@ -33,7 +34,14 @@ function getTodayLabel() {
 
 import Dropdown from "@/components/Dropdown";
 import PlaceCategory from "@/components/PlaceCategory";
-
+type TSoundLevel = "quiet" | "calm" | "white" | "noisy" | "unknown";
+const soundLeveltoString: Record<TSoundLevel, string> = {
+  quiet: "무소음",
+  calm: "잔잔한",
+  white: "백색소음",
+  noisy: "시끄러운",
+  unknown: "선택 안함",
+};
 interface PlaceType {
   id: string;
   latitude: number;
@@ -49,7 +57,7 @@ interface PlaceType {
   };
   tags: Record<string, string>; // 빈 객체이므로 임의의 키-값을 받을 수 있도록 설정
   summary: string;
-  sound_level: string;
+  sound_level: TSoundLevel;
   rating_score: number;
   address: string;
 }
@@ -117,6 +125,7 @@ export default function Home() {
               handleChange={handleChange}
               type={item}
               selectedValue={filter[item]}
+              key={"dropdwon" + item}
             />
           ))}
         </HStack>
@@ -140,40 +149,37 @@ export default function Home() {
         ))}
       </KakaoMap>
 
-      <BottomSheet height={500}>
+      <BottomSheet height={selectedPlace ? 200 : 500}>
         {selectedPlace ? (
           <HStack fullWidth justify={StackJustify.BETWEEN} className={s.item}>
-            <VStack>
-              <HStack fullWidth spacing={8}>
+            <VStack align={StackAlign.START} spacing={4}>
+              <Badge.Default
+                label={soundLeveltoString[selectedPlace.sound_level]}
+              />
+
+              <HStack fullWidth spacing={8} justify={StackJustify.START}>
                 <Typo.Moderate weight={Weight.BOLD}>
                   {selectedPlace.name}
                 </Typo.Moderate>
-                <Badge.Default
-                  size={BadgeSize.SMALL}
-                  label={selectedPlace.sound_level}
-                />
               </HStack>
               <HStack fullWidth spacing={8} className={s.flexStart}>
-                <Typo.Tiny>
+                <Typo.Base>
                   {selectedPlace.opening_hours?.[dayOfWeek]}
-                </Typo.Tiny>
+                </Typo.Base>
                 <HStack>
                   <Icon name={GlyphIcon.STAR} />
-                  <Typo.Tiny>{selectedPlace.rating_score}</Typo.Tiny>
+                  <Typo.Base>{selectedPlace.rating_score}</Typo.Base>
+                  <Typo.Base>
+                    {String(selectedPlace.distance).substring(0, 4)}km
+                  </Typo.Base>
                 </HStack>
               </HStack>
-
-              <div style={{ display: "flex" }}>
-                <Typo.Mini>
-                  {String(selectedPlace.distance).substring(0, 4)}km
-                </Typo.Mini>
-                · <Typo.Mini>{selectedPlace.address}</Typo.Mini>
-              </div>
+              <Typo.Base>{selectedPlace.address}</Typo.Base>
             </VStack>
             <img
               src={selectedPlace.preview_image?.thumbnail}
               alt=""
-              className={s.img}
+              className={s.selectedImg}
             />
           </HStack>
         ) : recommendState === null ? (
