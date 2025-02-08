@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useLogin } from '@/hooks/useLogin';
-import * as s from './styles.css';
+import { useLogin } from "@/hooks/useLogin";
+import * as s from "./styles.css";
 
-import { api } from '@/api/base';
-import { useMagic } from '@/stores/useMagic';
-import { BrandIcon, Button, GlyphIcon, HStack } from '@tapie-kr/inspire-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { api } from "@/api/base";
+import { useMagic } from "@/stores/useMagic";
+import { BrandIcon, Button, GlyphIcon, HStack } from "@tapie-kr/inspire-react";
+import { usePathname, useRouter } from "next/navigation";
 
 type PathMapType = {
   [key: string]: {
@@ -24,31 +24,32 @@ export default function MagicButton() {
   const { mode, sound } = useMagic((state) => state);
 
   const googleAction = useLogin(() => {
-    router.push('/signup/purpose');
+    router.push("/signup/purpose");
   });
 
   const pathMap: PathMapType = {
-    '/login': {
+    "/login": {
       leadingIcon: BrandIcon.GOOGLE,
-      label: 'Google로 로그인',
+      label: "Google로 로그인",
       action: () => {
         googleAction();
       },
     },
-    '/signup/purpose': {
-      label: '다음으로',
+    "/signup/purpose": {
+      label: "다음으로",
       action: () => {
-        router.push('/signup/situation');
+        router.push("/signup/situation");
       },
     },
-    '/signup/situation': {
-      label: '시작하기',
+    "/signup/situation": {
+      label: "시작하기",
       trailingIcon: GlyphIcon.ARROW_FORWARD,
       action: () => {
-        api(true).post('/member/update-personalized-data', {
+        api(true).post("/member/update-personalized-data", {
           mode,
           sound,
         });
+        router.push("/");
       },
     },
   };
@@ -61,7 +62,8 @@ export default function MagicButton() {
         fullWidth
         onClick={manifest.action}
         leadingIcon={manifest.leadingIcon}
-        trailingIcon={manifest.trailingIcon}>
+        trailingIcon={manifest.trailingIcon}
+      >
         {manifest.label}
       </Button.Default>
     </HStack>

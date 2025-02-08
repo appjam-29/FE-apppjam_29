@@ -1,5 +1,5 @@
-import BottomBar from '@/components/BottomBar';
-import { Box, VStack } from '@tapie-kr/inspire-react';
+import BottomBar from "@/components/BottomBar";
+import { Box, VStack } from "@tapie-kr/inspire-react";
 
 export default function RootLayout({
   children,
@@ -8,7 +8,11 @@ export default function RootLayout({
 }>) {
   return (
     <VStack fullWidth fullHeight>
-      <Box fullWidth fullHeight>
+      <Box
+        fullWidth
+        // fullHeight
+        style={{ overflowY: "scroll", height: "calc(100% - 64px)" }}
+      >
         {children}
       </Box>
       <BottomBar />

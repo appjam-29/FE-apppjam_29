@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as s from './styles.css';
+import * as s from "./styles.css";
 
 import {
   colorVars,
@@ -13,19 +13,16 @@ import {
   Typo,
   VStack,
   Weight,
-} from '@tapie-kr/inspire-react';
-import { useRouter } from 'next/navigation';
+} from "@tapie-kr/inspire-react";
 
 interface PlaceCategoryProps {
   label: string;
-  href: string;
+  onClick: any;
   count: number;
 }
 
 export default function PlaceCategory(props: PlaceCategoryProps) {
-  const { label, href, count } = props;
-
-  const router = useRouter();
+  const { label, onClick, count } = props;
 
   return (
     <VStack
@@ -33,9 +30,8 @@ export default function PlaceCategory(props: PlaceCategoryProps) {
       className={s.base}
       spacing={spacingVars.petite}
       align={StackAlign.START}
-      onClick={() => {
-        router.push(href);
-      }}>
+      onClick={onClick}
+    >
       <HStack justify={StackJustify.BETWEEN} fullWidth>
         <Typo.Base weight={Weight.SEMIBOLD}>{label}</Typo.Base>
         <Icon
