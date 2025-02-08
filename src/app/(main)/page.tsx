@@ -2,10 +2,8 @@
 
 import { api } from '@/api/base';
 import BottomSheet from '@/components/BottomSheet';
-import Dropdown from '@/components/Dropdown';
 import KakaoMap from '@/components/KakaoMap';
 import MarkerOverlay from '@/components/MarkerOverlay';
-import PlaceCategory from '@/components/PlaceCategory';
 import { Mode, useMagic } from '@/stores/useMagic';
 import {
   Badge,
@@ -14,7 +12,6 @@ import {
   HStack,
   Icon,
   IconName,
-  spacingVars,
   StackJustify,
   Typo,
   VStack,
@@ -25,6 +22,17 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ZoomControl } from 'react-kakao-maps-sdk';
 import * as s from './style.css';
+
+type todayLabel = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
+function getTodayLabel() {
+  const week: todayLabel[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const today = new Date().getDay();
+  const todayLabel = week[today];
+  return todayLabel;
+}
+
+import Dropdown from '@/components/Dropdown';
+import PlaceCategory from '@/components/PlaceCategory';
 
 interface PlaceType {
   id: string;
@@ -45,12 +53,7 @@ interface PlaceType {
   rating_score: number;
   address: string;
 }
-
-type todayLabel = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
-function getTodayLabel(): todayLabel {
-  const week: todayLabel[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-  return week[new Date().getDay()];
-}
+const filterType: ('rating_score' | 'mode')[] = ['rating_score', 'mode'];
 
 export default function Home() {
   const router = useRouter();
@@ -58,7 +61,24 @@ export default function Home() {
   const [pos, setPos] = useState({ lat: 37.545085, lng: 127.057695 });
   const [recommendState, setRecommendState] = useState<string | null>(null);
   const [selectedPlace, setSelectedPlace] = useState<PlaceType | null>(null);
-  const dayOfWeek = getTodayLabel();
+  const [places, setPlaces] = useState<PlaceType[]>([]);
+  const [filter, setFilter] = useState<{
+    rating_score: string;
+    mode: string;
+  }>({
+    rating_score: '',
+    mode: '',
+  });
+  const onChangeRecommend = (type: string) => {
+    setRecommendState(type);
+  };
+
+  const purposes: { id: Mode; icon: IconName; text: string }[] = [
+    { id: 'work', icon: GlyphIcon.DESCRIPTION, text: '작업' },
+    { id: 'rest', icon: GlyphIcon.SCHEDULE, text: '휴식' },
+    { id: 'change-ambiance', icon: GlyphIcon.SYNC, text: '분위기 전환' },
+  ];
+  const dayOfWeek = getTodayLabel() || 'sat';
 
   async function getNearbyPlaces(map: any) {
     try {
@@ -77,24 +97,11 @@ export default function Home() {
       router.push('/login');
     }
     getNearbyPlaces(null);
-
-    api(true)
-      .get('/places/dst/user-preference')
-      .then((res) => {
-        setLabel(res.data.data.name);
-        setPreferencePlaces(res.data.data.menu);
-      });
   }, []);
 
-  const onChangeRecommend = (type: string) => {
-    setRecommendState(type);
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilter((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
-
-  const purposes: { id: Mode; icon: IconName; text: string }[] = [
-    { id: 'work', icon: GlyphIcon.DESCRIPTION, text: '작업' },
-    { id: 'rest', icon: GlyphIcon.SCHEDULE, text: '휴식' },
-    { id: 'change-ambiance', icon: GlyphIcon.SYNC, text: '분위기 전환' },
-  ];
 
   return (
     <VStack fullWidth fullHeight>
@@ -191,45 +198,9 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <VStack fullWidth spacing={spacingVars.petite}>
-                <Typo.Petite className={s.latestOrPlace}>{label}</Typo.Petite>
-                {preferencePlaces.map((item) => (
-                  <Link
-                    href={`/detail/${item.id}`}
-                    key={item.id}
-                    style={{
-                      width: '100%',
-                    }}>
-                    <HStack
-                      fullWidth
-                      justify={StackJustify.BETWEEN}
-                      className={s.item}
-                      onClick={() => setSelectedPlace(item)}>
-                      <VStack>
-                        <HStack fullWidth spacing={8}>
-                          <Typo.Moderate weight={Weight.BOLD}>
-                            {item.name}
-                          </Typo.Moderate>
-                          <Badge.Default
-                            size={BadgeSize.SMALL}
-                            label={item.sound_level}
-                          />
-                        </HStack>
-                        <HStack fullWidth spacing={8} className={s.flexStart}>
-                          <Typo.Tiny>
-                            {item.opening_hours?.[dayOfWeek]}
-                          </Typo.Tiny>
-                          <HStack>
-                            <Icon name={GlyphIcon.STAR} />
-                            <Typo.Tiny>{item.rating_score}</Typo.Tiny>
-                          </HStack>
-                        </HStack>
-                      </VStack>
-                      <img src={item.preview_image} alt='' className={s.img} />
-                    </HStack>
-                  </Link>
-                ))}
-              </VStack>
+              <Typo.Petite className={s.latestOrPlace}>
+                최근 뜨는 장소
+              </Typo.Petite>
             </div>
           </>
         ) : (
