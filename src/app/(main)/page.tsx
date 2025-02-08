@@ -2,7 +2,6 @@
 
 import BottomSheet from "@/components/BottomSheet";
 import KakaoMap from "@/components/KakaoMap";
-import PlaceCategory from "@/components/PlaceCategory";
 import MarkerOverlay from "@/components/MarkerOverlay";
 import { api } from "@/api/base";
 import { useMagic, Mode } from "@/stores/useMagic";
@@ -23,36 +22,60 @@ import { useEffect, useState } from "react";
 import * as s from "./style.css";
 import Link from "next/link";
 import { ZoomControl } from "react-kakao-maps-sdk";
+import PlaceCategory from "@/components/PlaceCategory";
 
-type todayLabel = 'sun'|'mon'|'tue'|'wed'|'thu'|'fri'|'sat'
-function getTodayLabel() {
-  const week:todayLabel[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
-  const today = new Date().getDay();
-  const todayLabel = week[today];
-  return todayLabel;
+interface PlaceType {
+  id: string;
+  latitude: number;
+  longitude: number;
+  distance: number;
+  name: string;
+  opening_hours: {
+    [key in todayLabel]?: string;
+  };
+  preview_image: {
+    photos: string[];
+    thumbnail: string;
+  };
+  tags: Record<string, string>; // 빈 객체이므로 임의의 키-값을 받을 수 있도록 설정
+  summary: string;
+  sound_level: string;
+  rating_score: number;
+  address: string;
 }
+
+type todayLabel = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
+function getTodayLabel(): todayLabel {
+  const week: todayLabel[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+  return week[new Date().getDay()];
+}
+
 export default function Home() {
   const router = useRouter();
   const { mode, setMode } = useMagic((state) => state);
-  const [recommendState, setRecommendState] = useState<string | null>(null);
   const [pos, setPos] = useState({ lat: 37.545085, lng: 127.057695 });
-  const [places, setPlaces] = useState<
-    { distance: number,id: string,latitude: number,longitude: number,name: string,
-      opening_hours:{
-        fri: string,
-        mon: string,
-        sat: string,
-        sun: string,
-        thu: string,
-        tue: string,
-        wed: string,
-      },
-      preview_image:{
-        photos:string[],
-        thumbnail:string
-      }
-     }[]
-  >([]);
+  const [recommendState, setRecommendState] = useState<string | null>(null);
+  const [places, setPlaces] = useState<PlaceType[]>([]);
+  const [selectedPlace, setSelectedPlace] = useState<PlaceType | null>(null);
+  const dayOfWeek = getTodayLabel();
+
+  async function getNearbyPlaces(map: any) {
+    try {
+      const response = await api(true).get(
+        `/places/nearby?latitude=${pos.lat}&longitude=${pos.lng}&radius=3&max_results=1000`
+      );
+      setPlaces(response.data.data.places);
+    } catch (error) {
+      console.error("Error fetching places:", error);
+    }
+  }
+
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      router.push("/login");
+    }
+    getNearbyPlaces(null);
+  }, []);
 
   const onChangeRecommend = (type: string) => {
     setRecommendState(type);
@@ -63,42 +86,9 @@ export default function Home() {
     { id: "rest", icon: GlyphIcon.SCHEDULE, text: "휴식" },
     { id: "change-ambiance", icon: GlyphIcon.SYNC, text: "분위기 전환" },
   ];
-  const dayOfWeek = getTodayLabel() || "sat";
-  
-
-  async function getNearbyPlaces(map: any) {
-    try {
-      const response = await api(true).get(
-        `/places/nearby?latitude=${pos.lat}&longitude=${pos.lng}&radius=3&max_results=1000`
-      );
-
-      setPlaces(
-        response.data.data.places.map((place: any) => ({...place}))
-      );
-    } catch (error) {
-      console.error("Error fetching places:", error);
-    }
-  }
-
-  useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      router.push("/login");
-    }
-
-    getNearbyPlaces(null);
-
-  }, []);
 
   return (
     <VStack fullWidth fullHeight>
-      {
-        recommendState !== null &&
-        <HStack  fullWidth className={s.filterContainer}>
-          <select>
-
-          </select>
-        </HStack>
-      }
       <KakaoMap
         center={{ lat: pos.lat, lng: pos.lng }}
         onDragEnd={(map) => {
@@ -106,31 +96,65 @@ export default function Home() {
           setPos({ lat: latlng.getLat(), lng: latlng.getLng() });
           getNearbyPlaces(map);
         }}
-        onZoomChanged={(map) => {
-          getNearbyPlaces(map);
-        }}
+        onZoomChanged={getNearbyPlaces}
       >
         <ZoomControl />
-        {places.map((place, index) => (
-          <MarkerOverlay
-            key={index}
-            position={{ lat: place.latitude, lng: place.longitude }}
-          />
+        {places.map((place) => (
+          <div key={place.id} onClick={() => setSelectedPlace(place)}>
+            <MarkerOverlay
+              position={{ lat: place.latitude, lng: place.longitude }}
+            />
+          </div>
         ))}
       </KakaoMap>
 
       <BottomSheet height={500}>
-        {recommendState === null ? (
+        {selectedPlace ? (
+          <HStack fullWidth justify={StackJustify.BETWEEN} className={s.item}>
+            <VStack>
+              <HStack fullWidth spacing={8}>
+                <Typo.Moderate weight={Weight.BOLD}>
+                  {selectedPlace.name}
+                </Typo.Moderate>
+                <Badge.Default
+                  size={BadgeSize.SMALL}
+                  label={selectedPlace.sound_level}
+                />
+              </HStack>
+              <HStack fullWidth spacing={8} className={s.flexStart}>
+                <Typo.Tiny>
+                  {selectedPlace.opening_hours?.[dayOfWeek]}
+                </Typo.Tiny>
+                <HStack>
+                  <Icon name={GlyphIcon.STAR} />
+                  <Typo.Tiny>{selectedPlace.rating_score}</Typo.Tiny>
+                </HStack>
+              </HStack>
+
+              <div style={{ display: "flex" }}>
+                <Typo.Mini>
+                  {String(selectedPlace.distance).substring(0, 4)}km
+                </Typo.Mini>
+                · <Typo.Mini>{selectedPlace.address}</Typo.Mini>
+              </div>
+            </VStack>
+            <img
+              src={selectedPlace.preview_image?.thumbnail}
+              alt=""
+              className={s.img}
+            />
+          </HStack>
+        ) : recommendState === null ? (
           <>
             <HStack fullWidth>
               <PlaceCategory
                 label={"작업하기 좋은 카페"}
-                count={18}
+                count={15}
                 onClick={() => onChangeRecommend("CAFE")}
               />
               <PlaceCategory
                 label={"자연과 만나는 수목원"}
-                count={18}
+                count={15}
                 onClick={() => onChangeRecommend("arboretum")}
               />
             </HStack>
@@ -156,12 +180,13 @@ export default function Home() {
           </>
         ) : (
           <>
-            {places.map((item, idx) => (
-              <Link href={`/detail/${item.id}`} key={item.name + idx}>
+            {places.map((item) => (
+              <Link href={`/detail/${item.id}`} key={item.id}>
                 <HStack
                   fullWidth
                   justify={StackJustify.BETWEEN}
                   className={s.item}
+                  onClick={() => setSelectedPlace(item)}
                 >
                   <VStack>
                     <HStack fullWidth spacing={8}>
@@ -170,16 +195,14 @@ export default function Home() {
                       </Typo.Moderate>
                       <Badge.Default
                         size={BadgeSize.SMALL}
-                        label={"무소음"}
+                        label={item.sound_level}
                       />
                     </HStack>
                     <HStack fullWidth spacing={8} className={s.flexStart}>
-                      <Typo.Tiny>
-                        {item.opening_hours?.[dayOfWeek as todayLabel]}
-                      </Typo.Tiny>
+                      <Typo.Tiny>{item.opening_hours?.[dayOfWeek]}</Typo.Tiny>
                       <HStack>
                         <Icon name={GlyphIcon.STAR} />
-                        <Typo.Tiny>3</Typo.Tiny>
+                        <Typo.Tiny>{item.rating_score}</Typo.Tiny>
                       </HStack>
                     </HStack>
                   </VStack>
