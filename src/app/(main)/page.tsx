@@ -12,8 +12,8 @@ import {
   HStack,
   Icon,
   IconName,
-  StackJustify,
   StackAlign,
+  StackJustify,
   Typo,
   VStack,
   Weight,
@@ -277,6 +277,12 @@ export default function Home() {
           </>
         ) : (
           <>
+            <Icon
+              name={GlyphIcon.CLOSE}
+              onClick={() => {
+                setRecommendState(null);
+              }}
+            />
             {places.map((item) => (
               <Link href={`/detail/${item.id}`} key={item.id}>
                 <HStack
@@ -285,8 +291,8 @@ export default function Home() {
                   className={s.item}
                   onClick={() => setSelectedPlace(item)}
                 >
-                  <VStack>
-                    <HStack fullWidth spacing={8}>
+                  <VStack fullWidth align={StackAlign.START}>
+                    <HStack spacing={8}>
                       <Typo.Moderate weight={Weight.BOLD}>
                         {item.name}
                       </Typo.Moderate>
@@ -296,7 +302,7 @@ export default function Home() {
                       />
                     </HStack>
                     <HStack fullWidth spacing={8} className={s.flexStart}>
-                      <Typo.Tiny>{item.opening_hours?.[dayOfWeek]}</Typo.Tiny>
+                      <Typo.Tiny>{item.summary}</Typo.Tiny>
                       <HStack>
                         <Icon name={GlyphIcon.STAR} />
                         <Typo.Tiny>{item.rating_score}</Typo.Tiny>
@@ -304,7 +310,7 @@ export default function Home() {
                     </HStack>
                   </VStack>
                   <img
-                    src={item.preview_image?.thumbnail}
+                    src={item.preview_image?.photos[0]}
                     alt=""
                     className={s.img}
                   />
