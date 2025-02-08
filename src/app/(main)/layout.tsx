@@ -1,4 +1,4 @@
-import { Box, VStack } from '@tapie-kr/inspire-react';
+import { Box, StackJustify, VStack } from "@tapie-kr/inspire-react";
 
 export default function RootLayout({
   children,
@@ -6,11 +6,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <VStack fullWidth fullHeight>
+    <VStack fullWidth fullHeight justify={StackJustify.START}>
       <Box
         fullWidth
         // fullHeight
-        style={{ overflowY: 'scroll', height: 'calc(100% - 64px)' }}>
+        style={{ overflowY: "scroll", height: "calc(100% - 64px)" }}
+      >
         {children}
       </Box>
       {/* <BottomBar /> */}

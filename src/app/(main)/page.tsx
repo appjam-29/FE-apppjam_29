@@ -8,12 +8,10 @@ import { Mode, useMagic } from '@/stores/useMagic';
 import {
   Badge,
   BadgeSize,
-  Button,
   GlyphIcon,
   HStack,
   Icon,
   IconName,
-  spacingVars,
   StackAlign,
   StackJustify,
   Typo,
@@ -36,6 +34,7 @@ function getTodayLabel() {
 
 import Dropdown from '@/components/Dropdown';
 import PlaceCategory from '@/components/PlaceCategory';
+
 type TSoundLevel = 'quiet' | 'calm' | 'moderate' | 'noisy' | 'unknown';
 const soundLeveltoString: Record<TSoundLevel, string> = {
   quiet: '무소음',
@@ -88,6 +87,7 @@ export default function Home() {
   const [recommendState, setRecommendState] = useState<string | null>(null);
   const [selectedPlace, setSelectedPlace] = useState<PlaceType | null>(null);
   const [places, setPlaces] = useState<PlaceType[]>([]);
+  const [latestPlaces, setLatestPlaces] = useState<PlaceType[]>([]);
   const [filter, setFilter] = useState<{
     rating_score: string;
     mode: string;
@@ -119,6 +119,24 @@ export default function Home() {
       console.error('Error fetching places:', error);
     }
   }
+
+  useEffect(() => {
+    async function fetchLatestPlaces() {
+      try {
+        const response = await api(true).get('/places/dst/user-preference');
+
+        const recommendedPlaces = response.data.data.menu?.[0]?.places ?? [];
+
+        console.log('✅ 최신 장소 데이터:', recommendedPlaces);
+        setLatestPlaces(recommendedPlaces);
+      } catch (error) {
+        console.error('🚨 사용자 맞춤 추천 불러오기 실패:', error);
+        setLatestPlaces([]);
+      }
+    }
+
+    fetchLatestPlaces();
+  }, []);
 
   useEffect(() => {
     if (!localStorage.getItem('token')) {
@@ -224,82 +242,54 @@ export default function Home() {
               />
             </HStack>
             <div className={s.content}>
-              <VStack fullWidth spacing={spacingVars.petite}>
-                <div className={s.purposes}>
-                  {purposes.map((purpose) => (
-                    <div
-                      key={purpose.id}
-                      className={`${s.purpose} ${
-                        mode === purpose.id ? s.purposeSelected : ''
-                      }`}
-                      onClick={() => setMode(purpose.id)}>
-                      <Icon name={purpose.icon} />
-                      <Typo.Petite>{purpose.text}</Typo.Petite>
-                    </div>
-                  ))}
-                </div>
-                <Button.Default
-                  fullWidth
-                  leadingIcon={GlyphIcon.ADD}
-                  onClick={() => {
-                    router.push('/add-place');
-                  }}>
-                  공간 추가하기
-                </Button.Default>
-              </VStack>
-              <VStack
-                fullWidth
-                spacing={spacingVars.petite}
-                align={StackAlign.START}>
-                <Typo.Petite className={s.latestOrPlace}>{label}</Typo.Petite>
-                <VStack fullWidth spacing={spacingVars.micro}>
-                  {preferences.map((item) => (
-                    <Link
-                      href={`/detail/${item.id}`}
-                      key={item.id}
-                      style={{
-                        width: '100%',
-                      }}>
-                      <HStack
-                        fullWidth
-                        justify={StackJustify.BETWEEN}
-                        className={s.item}>
-                        <VStack fullWidth align={StackAlign.START}>
-                          <HStack spacing={8}>
-                            <Typo.Moderate weight={Weight.BOLD}>
-                              {item.name}
-                            </Typo.Moderate>
-                            <Badge.Default
-                              size={BadgeSize.SMALL}
-                              label={
-                                item.sound_level === 'unknown'
-                                  ? '미지정'
-                                  : item.sound_level === 'moderate'
-                                  ? '백색 소음'
-                                  : item.sound_level === 'quiet'
-                                  ? '무소음'
-                                  : '시끄러운'
-                              }
-                            />
+              <div className={s.purposes}>
+                {purposes.map((purpose) => (
+                  <div
+                    key={purpose.id}
+                    className={`${s.purpose} ${
+                      mode === purpose.id ? s.purposeSelected : ''
+                    }`}
+                    onClick={() => setMode(purpose.id)}>
+                    <Icon name={purpose.icon} />
+                    <Typo.Petite>{purpose.text}</Typo.Petite>
+                  </div>
+                ))}
+              </div>
+              <div className={s.latestBox}>
+                <Typo.Petite className={s.latestPlace}>{label}</Typo.Petite>
+                {preferences.map((item) => (
+                  <Link href={`/detail/${item.id}`} key={item.id}>
+                    <HStack
+                      fullWidth
+                      justify={StackJustify.BETWEEN}
+                      className={s.item}>
+                      <VStack fullWidth align={StackAlign.START}>
+                        <HStack spacing={8}>
+                          <Typo.Moderate weight={Weight.BOLD}>
+                            {item.name}
+                          </Typo.Moderate>
+                          <Badge.Default
+                            size={BadgeSize.SMALL}
+                            label={soundLeveltoString[item.sound_level]}
+                          />
+                        </HStack>
+                        <HStack fullWidth spacing={8} className={s.flexStart}>
+                          <Typo.Tiny>{item.summary}</Typo.Tiny>
+                          <HStack>
+                            <Icon name={GlyphIcon.STAR} />
+                            <Typo.Tiny>{item.rating_score}</Typo.Tiny>
                           </HStack>
-                          <HStack fullWidth spacing={8} className={s.flexStart}>
-                            <Typo.Tiny>{item.summary}</Typo.Tiny>
-                            <HStack>
-                              <Icon name={GlyphIcon.STAR} />
-                              <Typo.Tiny>{item.rating_score}</Typo.Tiny>
-                            </HStack>
-                          </HStack>
-                        </VStack>
-                        <img
-                          src={item.preview_image[0]}
-                          alt=''
-                          className={s.img}
-                        />
-                      </HStack>
-                    </Link>
-                  ))}
-                </VStack>
-              </VStack>
+                        </HStack>
+                      </VStack>
+                      <img
+                        src={item.preview_image[0]}
+                        alt=''
+                        className={s.img}
+                      />
+                    </HStack>
+                  </Link>
+                ))}
+              </div>
             </div>
           </>
         ) : (

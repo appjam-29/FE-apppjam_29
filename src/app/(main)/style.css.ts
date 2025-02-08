@@ -28,7 +28,13 @@ export const content = style({
   padding: "13px 17px",
 });
 
-export const latestOrPlace = style({
+export const latestBox = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: "4px",
+});
+
+export const latestPlace = style({
   marginTop: "20px",
 });
 
@@ -47,7 +53,7 @@ export const img = style({
 
 export const filterContainer = style({
   background: "#fff",
-  padding: "8px 12px",
+  padding: "4px 8px",
 });
 
 export const selectedImg = style({
