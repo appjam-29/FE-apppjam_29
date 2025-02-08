@@ -151,37 +151,39 @@ export default function Home() {
 
       <BottomSheet height={selectedPlace ? 200 : 500}>
         {selectedPlace ? (
-          <HStack fullWidth justify={StackJustify.BETWEEN} className={s.item}>
-            <VStack align={StackAlign.START} spacing={4}>
-              <Badge.Default
-                label={soundLeveltoString[selectedPlace.sound_level]}
-              />
+          <Link href={`/detail/${selectedPlace.id}`}>
+            <HStack fullWidth justify={StackJustify.BETWEEN} className={s.item}>
+              <VStack align={StackAlign.START} spacing={4}>
+                <Badge.Default
+                  label={soundLeveltoString[selectedPlace.sound_level]}
+                />
 
-              <HStack fullWidth spacing={8} justify={StackJustify.START}>
-                <Typo.Moderate weight={Weight.BOLD}>
-                  {selectedPlace.name}
-                </Typo.Moderate>
-              </HStack>
-              <HStack fullWidth spacing={8} className={s.flexStart}>
-                <Typo.Base>
-                  {selectedPlace.opening_hours?.[dayOfWeek]}
-                </Typo.Base>
-                <HStack>
-                  <Icon name={GlyphIcon.STAR} />
-                  <Typo.Base>{selectedPlace.rating_score}</Typo.Base>
-                  <Typo.Base>
-                    {String(selectedPlace.distance).substring(0, 4)}km
-                  </Typo.Base>
+                <HStack fullWidth spacing={8} justify={StackJustify.START}>
+                  <Typo.Moderate weight={Weight.BOLD}>
+                    {selectedPlace.name}
+                  </Typo.Moderate>
                 </HStack>
-              </HStack>
-              <Typo.Base>{selectedPlace.address}</Typo.Base>
-            </VStack>
-            <img
-              src={selectedPlace.preview_image?.thumbnail}
-              alt=""
-              className={s.selectedImg}
-            />
-          </HStack>
+                <HStack fullWidth spacing={8} className={s.flexStart}>
+                  <Typo.Base>
+                    {selectedPlace.opening_hours?.[dayOfWeek]}
+                  </Typo.Base>
+                  <HStack>
+                    <Icon name={GlyphIcon.STAR} />
+                    <Typo.Base>{selectedPlace.rating_score}</Typo.Base>
+                    <Typo.Base>
+                      {String(selectedPlace.distance).substring(0, 4)}km
+                    </Typo.Base>
+                  </HStack>
+                </HStack>
+                <Typo.Base>{selectedPlace.address}</Typo.Base>
+              </VStack>
+              <img
+                src={selectedPlace.preview_image?.thumbnail}
+                alt=""
+                className={s.selectedImg}
+              />
+            </HStack>
+          </Link>
         ) : recommendState === null ? (
           <>
             <HStack fullWidth>
