@@ -1,5 +1,6 @@
 'use client';
 
+import { api } from '@/api/base';
 import * as s from './page.css';
 
 import {
@@ -10,6 +11,7 @@ import {
   StackJustify,
   VStack,
 } from '@tapie-kr/inspire-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type Place = {
@@ -21,6 +23,7 @@ export default function AddPlacePage() {
   const [placeName, setPlaceName] = useState('');
   const [data, setData] = useState<Place[]>([]);
   const [searchedData, setSearchedData] = useState<Place[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     fetch('/data/_data.json')
@@ -65,6 +68,11 @@ export default function AddPlacePage() {
         {searchedData.map((item) => {
           return (
             <HStack
+              onClick={async () => {
+                await api(true).post('/places/places/add', { name: item.name });
+
+                router.push('/');
+              }}
               key={item.name}
               fullWidth
               justify={StackJustify.START}

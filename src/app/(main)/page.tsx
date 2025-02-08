@@ -8,10 +8,12 @@ import { Mode, useMagic } from '@/stores/useMagic';
 import {
   Badge,
   BadgeSize,
+  Button,
   GlyphIcon,
   HStack,
   Icon,
   IconName,
+  spacingVars,
   StackAlign,
   StackJustify,
   Typo,
@@ -34,11 +36,11 @@ function getTodayLabel() {
 
 import Dropdown from '@/components/Dropdown';
 import PlaceCategory from '@/components/PlaceCategory';
-type TSoundLevel = 'quiet' | 'calm' | 'white' | 'noisy' | 'unknown';
+type TSoundLevel = 'quiet' | 'calm' | 'moderate' | 'noisy' | 'unknown';
 const soundLeveltoString: Record<TSoundLevel, string> = {
   quiet: '무소음',
   calm: '잔잔한',
-  white: '백색소음',
+  moderate: '백색소음',
   noisy: '시끄러운',
   unknown: '선택 안함',
 };
@@ -61,6 +63,22 @@ interface PlaceType {
   rating_score: number;
   address: string;
 }
+interface PlacePrefType {
+  id: string;
+  latitude: number;
+  longitude: number;
+  distance: number;
+  name: string;
+  opening_hours: {
+    [key in todayLabel]?: string;
+  };
+  preview_image: string[];
+  tags: Record<string, string>; // 빈 객체이므로 임의의 키-값을 받을 수 있도록 설정
+  summary: string;
+  sound_level: TSoundLevel;
+  rating_score: number;
+  address: string;
+}
 const filterType: ('rating_score' | 'mode')[] = ['rating_score', 'mode'];
 
 export default function Home() {
@@ -77,6 +95,8 @@ export default function Home() {
     rating_score: '',
     mode: '',
   });
+  const [preferences, setPreferences] = useState<PlacePrefType[]>([]);
+  const [label, setLabel] = useState<string>('');
   const onChangeRecommend = (type: string) => {
     setRecommendState(type);
   };
@@ -105,6 +125,13 @@ export default function Home() {
       router.push('/login');
     }
     getNearbyPlaces(null);
+
+    api(true)
+      .get('/places/dst/user-preference')
+      .then((res: any) => {
+        setPreferences(res.data.data.menu[0].places);
+        setLabel(res.data.data.name);
+      });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -197,22 +224,82 @@ export default function Home() {
               />
             </HStack>
             <div className={s.content}>
-              <div className={s.purposes}>
-                {purposes.map((purpose) => (
-                  <div
-                    key={purpose.id}
-                    className={`${s.purpose} ${
-                      mode === purpose.id ? s.purposeSelected : ''
-                    }`}
-                    onClick={() => setMode(purpose.id)}>
-                    <Icon name={purpose.icon} />
-                    <Typo.Petite>{purpose.text}</Typo.Petite>
-                  </div>
-                ))}
-              </div>
-              <Typo.Petite className={s.latestOrPlace}>
-                최근 뜨는 장소
-              </Typo.Petite>
+              <VStack fullWidth spacing={spacingVars.petite}>
+                <div className={s.purposes}>
+                  {purposes.map((purpose) => (
+                    <div
+                      key={purpose.id}
+                      className={`${s.purpose} ${
+                        mode === purpose.id ? s.purposeSelected : ''
+                      }`}
+                      onClick={() => setMode(purpose.id)}>
+                      <Icon name={purpose.icon} />
+                      <Typo.Petite>{purpose.text}</Typo.Petite>
+                    </div>
+                  ))}
+                </div>
+                <Button.Default
+                  fullWidth
+                  leadingIcon={GlyphIcon.ADD}
+                  onClick={() => {
+                    router.push('/add-place');
+                  }}>
+                  공간 추가하기
+                </Button.Default>
+              </VStack>
+              <VStack
+                fullWidth
+                spacing={spacingVars.petite}
+                align={StackAlign.START}>
+                <Typo.Petite className={s.latestOrPlace}>{label}</Typo.Petite>
+                <VStack fullWidth spacing={spacingVars.micro}>
+                  {preferences.map((item) => (
+                    <Link
+                      href={`/detail/${item.id}`}
+                      key={item.id}
+                      style={{
+                        width: '100%',
+                      }}>
+                      <HStack
+                        fullWidth
+                        justify={StackJustify.BETWEEN}
+                        className={s.item}>
+                        <VStack fullWidth align={StackAlign.START}>
+                          <HStack spacing={8}>
+                            <Typo.Moderate weight={Weight.BOLD}>
+                              {item.name}
+                            </Typo.Moderate>
+                            <Badge.Default
+                              size={BadgeSize.SMALL}
+                              label={
+                                item.sound_level === 'unknown'
+                                  ? '미지정'
+                                  : item.sound_level === 'moderate'
+                                  ? '백색 소음'
+                                  : item.sound_level === 'quiet'
+                                  ? '무소음'
+                                  : '시끄러운'
+                              }
+                            />
+                          </HStack>
+                          <HStack fullWidth spacing={8} className={s.flexStart}>
+                            <Typo.Tiny>{item.summary}</Typo.Tiny>
+                            <HStack>
+                              <Icon name={GlyphIcon.STAR} />
+                              <Typo.Tiny>{item.rating_score}</Typo.Tiny>
+                            </HStack>
+                          </HStack>
+                        </VStack>
+                        <img
+                          src={item.preview_image[0]}
+                          alt=''
+                          className={s.img}
+                        />
+                      </HStack>
+                    </Link>
+                  ))}
+                </VStack>
+              </VStack>
             </div>
           </>
         ) : (
@@ -237,7 +324,15 @@ export default function Home() {
                       </Typo.Moderate>
                       <Badge.Default
                         size={BadgeSize.SMALL}
-                        label={item.sound_level}
+                        label={
+                          item.sound_level === 'unknown'
+                            ? '미지정'
+                            : item.sound_level === 'moderate'
+                            ? '백색 소음'
+                            : item.sound_level === 'quiet'
+                            ? '무소음'
+                            : '시끄러운'
+                        }
                       />
                     </HStack>
                     <HStack fullWidth spacing={8} className={s.flexStart}>
