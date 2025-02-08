@@ -47,5 +47,11 @@ export const img = style({
 
 export const filterContainer = style({
   background: "#fff",
-  padding: "4px 8px",
+  padding: "8px 12px",
+});
+
+export const selectedImg = style({
+  width: "120px",
+  height: "120px",
+  borderRadius: "8px",
 });

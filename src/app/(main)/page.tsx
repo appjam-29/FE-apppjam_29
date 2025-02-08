@@ -8,12 +8,10 @@ import { Mode, useMagic } from '@/stores/useMagic';
 import {
   Badge,
   BadgeSize,
-  Button,
   GlyphIcon,
   HStack,
   Icon,
   IconName,
-  spacingVars,
   StackAlign,
   StackJustify,
   Typo,
@@ -36,7 +34,14 @@ function getTodayLabel() {
 
 import Dropdown from '@/components/Dropdown';
 import PlaceCategory from '@/components/PlaceCategory';
-
+type TSoundLevel = 'quiet' | 'calm' | 'white' | 'noisy' | 'unknown';
+const soundLeveltoString: Record<TSoundLevel, string> = {
+  quiet: '무소음',
+  calm: '잔잔한',
+  white: '백색소음',
+  noisy: '시끄러운',
+  unknown: '선택 안함',
+};
 interface PlaceType {
   id: string;
   latitude: number;
@@ -52,7 +57,7 @@ interface PlaceType {
   };
   tags: Record<string, string>; // 빈 객체이므로 임의의 키-값을 받을 수 있도록 설정
   summary: string;
-  sound_level: string;
+  sound_level: TSoundLevel;
   rating_score: number;
   address: string;
 }
@@ -109,12 +114,17 @@ export default function Home() {
   return (
     <VStack fullWidth fullHeight>
       {recommendState !== null && (
-        <HStack fullWidth className={s.filterContainer}>
+        <HStack
+          fullWidth
+          className={s.filterContainer}
+          justify={StackJustify.START}
+          spacing={4}>
           {filterType.map((item) => (
             <Dropdown
               handleChange={handleChange}
               type={item}
               selectedValue={filter[item]}
+              key={'dropdwon' + item}
             />
           ))}
         </HStack>
@@ -137,42 +147,41 @@ export default function Home() {
         ))}
       </KakaoMap>
 
-      <BottomSheet height={500}>
+      <BottomSheet height={selectedPlace ? 200 : 500}>
         {selectedPlace ? (
-          <HStack fullWidth justify={StackJustify.BETWEEN} className={s.item}>
-            <VStack>
-              <HStack fullWidth spacing={8}>
-                <Typo.Moderate weight={Weight.BOLD}>
-                  {selectedPlace.name}
-                </Typo.Moderate>
+          <Link href={`/detail/${selectedPlace.id}`}>
+            <HStack fullWidth justify={StackJustify.BETWEEN} className={s.item}>
+              <VStack align={StackAlign.START} spacing={4}>
                 <Badge.Default
-                  size={BadgeSize.SMALL}
-                  label={selectedPlace.sound_level}
+                  label={soundLeveltoString[selectedPlace.sound_level]}
                 />
-              </HStack>
-              <HStack fullWidth spacing={8} className={s.flexStart}>
-                <Typo.Tiny>
-                  {selectedPlace.opening_hours?.[dayOfWeek]}
-                </Typo.Tiny>
-                <HStack>
-                  <Icon name={GlyphIcon.STAR} />
-                  <Typo.Tiny>{selectedPlace.rating_score}</Typo.Tiny>
-                </HStack>
-              </HStack>
 
-              <div style={{ display: 'flex' }}>
-                <Typo.Mini>
-                  {String(selectedPlace.distance).substring(0, 4)}km
-                </Typo.Mini>
-                · <Typo.Mini>{selectedPlace.address}</Typo.Mini>
-              </div>
-            </VStack>
-            <img
-              src={selectedPlace.preview_image?.thumbnail}
-              alt=''
-              className={s.img}
-            />
-          </HStack>
+                <HStack fullWidth spacing={8} justify={StackJustify.START}>
+                  <Typo.Moderate weight={Weight.BOLD}>
+                    {selectedPlace.name}
+                  </Typo.Moderate>
+                </HStack>
+                <HStack fullWidth spacing={8} className={s.flexStart}>
+                  <Typo.Base>
+                    {selectedPlace.opening_hours?.[dayOfWeek]}
+                  </Typo.Base>
+                  <HStack>
+                    <Icon name={GlyphIcon.STAR} />
+                    <Typo.Base>{selectedPlace.rating_score}</Typo.Base>
+                    <Typo.Base>
+                      {String(selectedPlace.distance).substring(0, 4)}km
+                    </Typo.Base>
+                  </HStack>
+                </HStack>
+                <Typo.Base>{selectedPlace.address}</Typo.Base>
+              </VStack>
+              <img
+                src={selectedPlace.preview_image?.thumbnail}
+                alt=''
+                className={s.selectedImg}
+              />
+            </HStack>
+          </Link>
         ) : recommendState === null ? (
           <>
             <HStack fullWidth>
@@ -188,29 +197,19 @@ export default function Home() {
               />
             </HStack>
             <div className={s.content}>
-              <VStack fullWidth spacing={spacingVars.moderate}>
-                <div className={s.purposes}>
-                  {purposes.map((purpose) => (
-                    <div
-                      key={purpose.id}
-                      className={`${s.purpose} ${
-                        mode === purpose.id ? s.purposeSelected : ''
-                      }`}
-                      onClick={() => setMode(purpose.id)}>
-                      <Icon name={purpose.icon} />
-                      <Typo.Petite>{purpose.text}</Typo.Petite>
-                    </div>
-                  ))}
-                </div>
-                <Button.Default
-                  fullWidth
-                  leadingIcon={GlyphIcon.ADD}
-                  onClick={() => {
-                    router.push('/add-place');
-                  }}>
-                  공간 추가하기
-                </Button.Default>
-              </VStack>
+              <div className={s.purposes}>
+                {purposes.map((purpose) => (
+                  <div
+                    key={purpose.id}
+                    className={`${s.purpose} ${
+                      mode === purpose.id ? s.purposeSelected : ''
+                    }`}
+                    onClick={() => setMode(purpose.id)}>
+                    <Icon name={purpose.icon} />
+                    <Typo.Petite>{purpose.text}</Typo.Petite>
+                  </div>
+                ))}
+              </div>
               <Typo.Petite className={s.latestOrPlace}>
                 최근 뜨는 장소
               </Typo.Petite>
@@ -231,8 +230,8 @@ export default function Home() {
                   justify={StackJustify.BETWEEN}
                   className={s.item}
                   onClick={() => setSelectedPlace(item)}>
-                  <VStack align={StackAlign.START} justify={StackJustify.START}>
-                    <HStack spacing={8}>
+                  <VStack>
+                    <HStack fullWidth spacing={8}>
                       <Typo.Moderate weight={Weight.BOLD}>
                         {item.name}
                       </Typo.Moderate>

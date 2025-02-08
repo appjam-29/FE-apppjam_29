@@ -13,95 +13,141 @@ import {
   Weight,
 } from "@tapie-kr/inspire-react";
 import * as s from "./style.css";
-import Comment from "@/components/Comment";
+import Comment, { CommentProps } from "@/components/Comment";
 import KakaoMap from "@/components/KakaoMap";
 import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { api } from "@/api/base";
+
+interface PlaceType {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  map_id: string;
+  address: string;
+  rating_score: number;
+  opening_hours: {
+    mon?: string;
+    tue?: string;
+    wed?: string;
+    thu?: string;
+    fri?: string;
+    sat?: string;
+    sun?: string;
+  };
+  preview_image: {
+    photos: string[];
+    thumbnail: string;
+  };
+  tags: Record<string, string>;
+  summary: string;
+  sound_level: string;
+}
+
+interface ReviewType {
+  nickname: string;
+  user_img: string;
+  date: string;
+  score: number;
+  comment: string;
+}
+
+type todayLabel = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
+function getTodayLabel(): todayLabel {
+  const week: todayLabel[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+  return week[new Date().getDay()];
+}
 
 export default function DetailPage() {
   const router = useRouter();
   const params = useParams();
-  const id = params.id;
+  const placeId = params.id as string;
 
-  const data = {
-    address_name: "서울 성동구 성수동2가 277-17",
-    id: "13062009",
-    place_name: "이디야커피 성수아카데미점",
-    start_time: "09:00",
-    end_time: "17:00",
-    score: 5,
-    noise: "무소음",
-    distance: "150",
-    lat: 37.5665,
-    lng: 126.978,
-    review: [
-      {
-        nickname: "안예성이닷",
-        user_img: "https://placehold.co/1000x1000",
-        date: "25.02.08.토",
-        score: 3,
-        comment:
-          "사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요",
-      },
-      {
-        nickname: "안예성이닷",
-        user_img: "https://placehold.co/1000x1000",
-        date: "25.02.08.토",
-        score: 5,
-        comment:
-          "사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요",
-      },
-      {
-        nickname: "안예성이닷",
-        user_img: "https://placehold.co/1000x1000",
-        date: "25.02.08.토",
-        score: 5,
-        comment:
-          "사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요 사장님이 너무 chill절하세요",
-      },
-    ],
-  };
+  const [placeData, setPlaceData] = useState<PlaceType | null>(null);
+  const [reviews, setReviews] = useState<CommentProps[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const dayOfWeek = getTodayLabel();
+  const [pos] = useState({ lat: 37.545085, lng: 127.057695 });
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setIsLoading(true);
+        const placeResponse = await api(true).get(`/places/${placeId}`, {
+          params: {
+            latitude: pos.lat,
+            longitude: pos.lng,
+          },
+        });
+        setPlaceData(placeResponse.data.data as PlaceType);
+
+        const reviewsResponse = await api(true).get(
+          `/places/${placeId}/reviews`
+        );
+        setReviews(reviewsResponse.data.data.reviews as CommentProps[]);
+      } catch (error) {
+        console.error("Error fetching place details:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (placeId) {
+      fetchData();
+    }
+  }, [placeId]);
+
+  if (isLoading) {
+    return <Typo.Base>로딩 중...</Typo.Base>;
+  }
+
+  if (!placeData) {
+    return <Typo.Base>데이터를 불러올 수 없습니다.</Typo.Base>;
+  }
+
   return (
     <VStack fullWidth>
-      <img src="https://placehold.co/1000x1000" alt="" className={s.banner} />
+      <img
+        src={
+          placeData.preview_image?.thumbnail || "https://placehold.co/1000x1000"
+        }
+        alt=""
+        className={s.banner}
+      />
       <VStack fullWidth className={s.padding} spacing={16}>
         <HStack fullWidth justify={StackJustify.START} spacing={8}>
-          <Typo.Moderate weight={Weight.BOLD}>{data.place_name}</Typo.Moderate>
-          <Badge.Default label={data.noise} />
+          <Typo.Moderate weight={Weight.BOLD}>{placeData.name}</Typo.Moderate>
+          <Badge.Default label={placeData.sound_level} />
         </HStack>
         <hr className={s.line} />
         <VStack fullWidth align={StackAlign.START} spacing={4}>
           <HStack spacing={8}>
             <Icon name={GlyphIcon.ARROW_FORWARD} />
-            <Typo.Micro>{data.address_name}</Typo.Micro>
+            <Typo.Micro>{placeData.address}</Typo.Micro>
           </HStack>
           <HStack spacing={8}>
             <Icon name={GlyphIcon.SCHEDULE} />
-            <Typo.Micro>
-              {data.start_time} ~ {data.end_time}
-            </Typo.Micro>
-          </HStack>
-          <HStack spacing={8}>
-            <Icon name={GlyphIcon.FACE} />
-            <Typo.Micro>{data.distance}m</Typo.Micro>
+            <Typo.Micro>{placeData.opening_hours?.[dayOfWeek]}</Typo.Micro>
           </HStack>
         </VStack>
         <hr className={s.line} />
         <VStack fullWidth align={StackAlign.START} spacing={24}>
           <HStack spacing={8}>
             <Typo.Medium weight={Weight.BOLD}>사용자 리뷰</Typo.Medium>
-            <Typo.Base weight={Weight.EXTRABOLD}>
-              {data.review.length}
-            </Typo.Base>
+            <Typo.Base weight={Weight.EXTRABOLD}>{reviews.length}</Typo.Base>
           </HStack>
           <VStack fullWidth spacing={16}>
-            {data.review.map((item, index) => (
-              <Comment {...item} key={index} />
-            ))}
+            {reviews.length > 0 ? (
+              reviews.map((item, index) => <Comment {...item} key={index} />)
+            ) : (
+              <Typo.Base>아직 리뷰가 없습니다.</Typo.Base>
+            )}
           </VStack>
           <Button.Default
             className={s.selfCenter}
             onClick={() => {
-              router.push(`/detail/${id}/all`);
+              router.push(`/detail/${placeId}/all`);
             }}
           >
             사용자 리뷰 더보기
@@ -112,7 +158,7 @@ export default function DetailPage() {
           <VStack spacing={8} fullWidth align={StackAlign.START}>
             <Typo.Medium weight={Weight.BOLD}>지도</Typo.Medium>
             <KakaoMap
-              center={{ lat: data.lat, lng: data.lng }}
+              center={{ lat: placeData.latitude, lng: placeData.longitude }}
               height="320px"
             />
           </VStack>
